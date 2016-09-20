@@ -3,12 +3,14 @@ Created on Sep 19, 2016
 
 @author: tomd
 '''
-import xml.etree.ElementTree as ET
 import os
 import pickle
-from db.tools import logfilter, logmap, errmap, errfilter
-import config
+import pprint
 import sqlite3
+
+import config
+from db.tools import logfilter, logmap, errmap, errfilter
+import xml.etree.ElementTree as ET
 
 
 def is_epl_match(matchfile):
@@ -91,17 +93,17 @@ eventmappings = [
 eventextra = [("MatchID", "int")]
 
 if __name__ == '__main__':
-    os.remove(config.db)
+    #os.remove(config.db)
     con = sqlite3.connect(config.db)
 
-    create_table('Match', matchmappings)
-    create_table('Event', eventmappings, eventextra)
-    con.commit()
-
-#    import pprint
-# #   save_epl_matches()
-    epl = pickle.load(open(config.epl_matches, 'rb'))
-    logmap(add_match, epl)
+#     create_table('Match', matchmappings)
+#     create_table('Event', eventmappings, eventextra)
+#     con.commit()
+#  
+# #    import pprint
+# # #   save_epl_matches()
+#     epl = pickle.load(open(config.epl_matches, 'rb'))
+#     logmap(add_match, epl)
     #root = ET.parse(epl[0]).getroot()
     # print root[1].attrib
     # for event in ET.parse(epl[0]).getroot():
@@ -113,6 +115,7 @@ if __name__ == '__main__':
 #     event = root[6]
 #     pprint.pprint(event.attrib)
 #     pprint.pprint(matchmappings)
-
+    rows = con.execute("select * from event limit 1000").fetchall()
+    pprint.pprint(rows)
     con.commit()
     con.close()
