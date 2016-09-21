@@ -1,0 +1,10 @@
+From visual exploration I conclude that a lot of time windows are crappy.
+Phases is definitely a better approach than time windows.
+
+How to filter phases from data?
+How to match the current phase to other phases?
+
+Event data is very complex. Can't just take xy data to get a good picture.
+Event type, team and outcome are important attributes
+that can't be ignored when trying to capture gameplay knowledge!
+Maybe filter certain events?

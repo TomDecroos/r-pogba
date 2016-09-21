@@ -11,6 +11,7 @@ class Connection:
         
     def __enter__(self):
         self.con = sqlite3.connect(self.dbfile)
+        self.con.row_factory = sqlite3.Row
         return self.con.cursor()
         
     def __exit__(self,type,value,traceback):

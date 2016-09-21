@@ -1,4 +1,5 @@
-CREATE TABLE IF NOT EXISTS EventType (EventID int PRIMARY KEY ON CONFLICT REPLACE, Name text);
+DROP TABLE IF EXISTS EventType;
+CREATE TABLE EventType (TypeID int PRIMARY KEY, Name text);
 INSERT INTO EventType VALUES
 (1, 'pass'),
 (2, 'offside pass'),

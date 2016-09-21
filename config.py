@@ -13,8 +13,13 @@ optaf21 = opta + "/f21/mixed/"
 epl_matches = "data/epl-matches"
 epl_id = 8
 
+
 ''' Opta Database '''
 db = 'data/opta.db'
 #db = "localdata/opta.db"
 db_small = 'data/opta-small.db'
 eventtype_table = 'info/eventtype.sql'
+
+
+''' Images '''
+soccerfield = 'img/soccerfield.png'
