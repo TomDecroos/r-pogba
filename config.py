@@ -16,3 +16,5 @@ epl_id = 8
 ''' Opta Database '''
 db = 'data/opta.db'
 #db = "localdata/opta.db"
+db_small = 'data/opta-small.db'
+eventtype_table = 'info/eventtype.sql'

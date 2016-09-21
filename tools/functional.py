@@ -86,3 +86,8 @@ def errfilter(f, xs, threshold=1):
         raise Exception("Too many filtering errors: %2.1f%%"
                         % (err_perc * 100))
     return results
+
+def fst(x):
+    return x[0]
+def snd(x):
+    return x[1]

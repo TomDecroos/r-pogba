@@ -5,12 +5,12 @@ Created on Sep 19, 2016
 '''
 import os
 import pickle
-import pprint
-import sqlite3
 
 import config
-from db.tools import logfilter, logmap, errmap, errfilter
+from tools.functional import logfilter, logmap, errmap, errfilter
 import xml.etree.ElementTree as ET
+from tools.connection import Connection, executeSQL
+from pprint import pprint
 
 
 def is_epl_match(matchfile):
@@ -88,34 +88,24 @@ eventmappings = [
     mapping('player_id', 'PlayerID', 'int'),
     mapping('team_id', 'TeamID', 'int'),
     mapping('outcome', 'Outcome', 'int'),
+    mapping('period_id', 'Period', 'int'),
+    mapping('period_minute', 'Minute', 'int'),
+    mapping('period_second', 'Second', 'int')
 ]
 
 eventextra = [("MatchID", "int")]
 
-if __name__ == '__main__':
-    #os.remove(config.db)
-    con = sqlite3.connect(config.db)
 
-#     create_table('Match', matchmappings)
-#     create_table('Event', eventmappings, eventextra)
-#     con.commit()
-#  
-# #    import pprint
-# # #   save_epl_matches()
+if __name__ == '__main__':
+#     os.remove(config.db_small)
+#     with Connection(config.db_small) as con:
+#         create_table('Match', matchmappings)
+#         create_table('Event', eventmappings, eventextra)
+#         epl = pickle.load(open(config.epl_matches, 'rb'))
+#         logmap(add_match, epl[0:20])
+    
+    executeSQL(config.db_small,config.eventtype_table)
+    
 #     epl = pickle.load(open(config.epl_matches, 'rb'))
-#     logmap(add_match, epl)
-    #root = ET.parse(epl[0]).getroot()
-    # print root[1].attrib
-    # for event in ET.parse(epl[0]).getroot():
-    #     print event.attrib['player_id']
-# #     # print len(epl)
-#     root = ET.parse(epl[5]).getroot()
-#     print set([e.tag for e in root])
-#     # print root.attrib
-#     event = root[6]
-#     pprint.pprint(event.attrib)
-#     pprint.pprint(matchmappings)
-    rows = con.execute("select * from event limit 1000").fetchall()
-    pprint.pprint(rows)
-    con.commit()
-    con.close()
+#     event = ET.parse(epl[0]).getroot()[1]
+#     pprint(event.attrib)

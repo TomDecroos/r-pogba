@@ -1,0 +1,8 @@
+# league name, league id
+('Italian Serie A', '21'),
+('Italian Serie B', '105'),
+('English Barclays Premier League', '8'),
+('German Bundesliga', '22'),
+('English Barclays Premiership', '8'),
+('Spanish La Liga', '23'),
+('French Ligue 1', '24')
