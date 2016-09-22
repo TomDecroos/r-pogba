@@ -8,3 +8,8 @@ Event data is very complex. Can't just take xy data to get a good picture.
 Event type, team and outcome are important attributes
 that can't be ignored when trying to capture gameplay knowledge!
 Maybe filter certain events?
+
+Challenge events are weird, subjective and not consistent, best to just ignore them
+Data is noisy, probably not all events are annotated, sometimes illogical sequences
+Ignore complex events, focus on simple events like:
+passes, clearances, interceptions, shots and goals
