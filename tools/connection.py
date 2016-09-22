@@ -18,8 +18,8 @@ class Connection:
         self.con.commit()
         self.con.close()
 
-def executeSQL(db,sqlfile):
-    with Connection(db) as c, open(sqlfile,'r') as fh:
+def executefile(c,sqlfile):
+    with open(sqlfile,'r') as fh:
         cmds = fh.read().split(";")
         for cmd in cmds:
             c.execute(cmd)

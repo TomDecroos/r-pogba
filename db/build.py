@@ -7,28 +7,17 @@ import os
 import pickle
 
 import config
-from tools.functional import logfilter, logmap, errmap, errfilter
+from tools.functional import logmap, errmap, errfilter
 import xml.etree.ElementTree as ET
-from tools.connection import Connection, executeSQL
+from tools.connection import Connection, executefile
 from pprint import pprint
 
 
-def is_epl_match(matchfile):
-    root = ET.parse(matchfile).getroot()
-    return int(root.attrib['competition_id']) == config.epl_id
+def add_row(c,table, element, mappings, extra=[]):
+    add_rows(c,table, [element], mappings, extra)
 
 
-def save_epl_matches():
-    matchfiles = [config.optaf21 + m for m in os.listdir(config.optaf21)]
-    epl_mfs = logfilter(is_epl_match, matchfiles)
-    pickle.dump(epl_mfs, open(config.epl_matches, 'wb'))
-
-
-def add_row(table, element, mappings, extra=[]):
-    add_rows(table, [element], mappings, extra)
-
-
-def add_rows(table, elements, mappings, extra=[]):
+def add_rows(c,table, elements, mappings, extra=[]):
     columns = [m.sqlcolumn for m in mappings]
     columns += ([x[0] for x in extra])
     questionmarks = map(lambda x: "?", columns)
@@ -42,24 +31,24 @@ def add_rows(table, elements, mappings, extra=[]):
         return tuple(values)
 
     valuess = errmap(getvalues, elements, threshold=0.05)
-    con.executemany(qry, valuess)
+    c.executemany(qry, valuess)
 
 
-def add_match(matchfile):
+def add_match(c,matchfile):
     root = ET.parse(matchfile).getroot()
-    add_row("Match", root, matchmappings)
+    add_row(c,"Match", root, matchmappings)
 
     extra = [("MatchID", int(root.attrib['id']))]
 
     events = errfilter(lambda x: x.tag != "DeletedEvent", root, 0.10)
-    add_rows('Event', events, eventmappings, extra)
+    add_rows(c,'Event', events, eventmappings, extra)
 
 
-def create_table(name, mappings, extra=[]):
+def create_table(c,name, mappings, extra=[]):
     fields = [m.sqlcolumn + " " + m.sqlcolumntype for m in mappings]
     fields += [x[0] + " " + x[1] for x in extra]
     qry = 'CREATE TABLE %s %s' % (name, "(" + ", ".join(fields) + ")")
-    con.execute(qry)
+    c.execute(qry)
     print "Table %s succesfully created" % name
 
 
@@ -95,17 +84,17 @@ eventmappings = [
 
 eventextra = [("MatchID", "int")]
 
+def create_db(dbfile,matchfilter = None):
+    os.remove(dbfile)
+    with Connection(dbfile) as c:
+        create_table(c,'Match', matchmappings)
+        create_table(c,'Event', eventmappings, eventextra)
+        executefile(c,config.eventtype_table)
+        epl = pickle.load(open(config.epl_matches, 'rb'))
+        if matchfilter:
+            epl = matchfilter(epl)
+        logmap(lambda x: add_match(c,x), epl)
 
 if __name__ == '__main__':
-#     os.remove(config.db_small)
-#     with Connection(config.db_small) as con:
-#         create_table('Match', matchmappings)
-#         create_table('Event', eventmappings, eventextra)
-#         epl = pickle.load(open(config.epl_matches, 'rb'))
-#         logmap(add_match, epl[0:20])
+    create_db(config.db_small, lambda x: x[0:15])
     
-    executeSQL(config.db_small,config.eventtype_table)
-    
-#     epl = pickle.load(open(config.epl_matches, 'rb'))
-#     event = ET.parse(epl[0]).getroot()[1]
-#     pprint(event.attrib)

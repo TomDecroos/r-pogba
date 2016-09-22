@@ -11,3 +11,6 @@ def sectomin(seconds):
  
 def floattodigital(minute):
     return sectomin(mintosec(minute))
+
+def eventsec(e):
+    return mintosec(e['minute'],e['second'])

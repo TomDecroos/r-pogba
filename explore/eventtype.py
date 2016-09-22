@@ -6,11 +6,8 @@ Created on Sep 21, 2016
 from tools.connection import Connection
 import config
 from pprint import pprint
-from tools.functional import fst, snd
-import matplotlib.pyplot as plt
+from tools.functional import fst,snd
 from collections import Counter
-import scipy.ndimage
-from tools.time import mintosec
 
 def eventtype_freq(dbfile,matchid=None):
     with Connection(dbfile) as c:

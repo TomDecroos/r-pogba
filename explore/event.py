@@ -10,9 +10,11 @@ import config
 import matplotlib.pyplot as plt
 from tools.connection import Connection
 from tools.time import mintosec
+from tools.sql import getfields
+from db.qry import getteams
 
 
-def window(c,matchid,period=1,startmin=0,endmin=1,relevant=True):
+def getevents(c,matchid,period=1,startmin=0,endmin=1,relevant=True):
     qry = """
         select x, y, minute, second, name, teamid, outcome
         from event natural join eventtype
@@ -22,13 +24,23 @@ def window(c,matchid,period=1,startmin=0,endmin=1,relevant=True):
         """
     if relevant: qry += " and relevant = 1"
     values = (matchid, period, mintosec(startmin), mintosec(endmin))
-    events = c.execute(qry, values).fetchall()
-    x,y,minute,second,name,teamid,outcome = zip(*events)
+    return c.execute(qry, values).fetchall()
+
+def printevents(events, hometeamid, awayteamid):
+    fieldnames = "name,teamid,outcome"
+    name, teamid, outcome = getfields(events, fieldnames)
+    
+    for t, n, o in zip(teamid, name, outcome):
+        msg = "+" if hometeamid == t else "-"
+        msg += n
+        msg += "*" if o == 0 else ""
+        print msg
+    
+def plotevents(events,hometeamid,awayteamid):
+    fieldnames = "x,y,minute,second,name,teamid,outcome"
+    x,y,minute,second,name,teamid,outcome = getfields(events,fieldnames)
     time = map(lambda x:mintosec(x[0],x[1]), zip(minute,second))
     
-    
-    qry = "select hometeamid,awayteamid from match where id = ?"
-    (hometeamid,awayteamid) = c.execute(qry,(matchid,)).fetchone()
     def correction(x,teamid):
         return x if teamid == hometeamid else 1-x
     x = map(lambda x: correction(*x), zip(x, teamid))
@@ -43,32 +55,24 @@ def window(c,matchid,period=1,startmin=0,endmin=1,relevant=True):
         return box,edge
     
     colors = map(lambda x: choosecolors(*x), zip(teamid,outcome,name))
-    
-    
-    for t, n, o in zip(teamid, name, outcome):
-        msg = "+" if hometeamid == t else "-"
-        msg += n
-        msg += "*" if o == 0 else ""
-        print msg
-        
         
     fig = plt.figure()
     size = 11
     fig.set_size_inches(1.61*size,size, forward=True)
     
     axtx = plt.subplot2grid((2,2), (0,0))
-    plottimeseries(axtx, time, x, colors, name)
+    _plottimeseries(axtx, time, x, colors, name)
     
     axty = plt.subplot2grid((2,2), (1,0))
-    plottimeseries(axty, time, y, colors, name)
+    _plottimeseries(axty, time, y, colors, name)
    
     axxy = plt.subplot2grid((2,2), (0,1), rowspan = 2)
-    plotxy(axxy, x, y, colors, name)
+    _plotxy(axxy, x, y, colors, name)
     
     plt.tight_layout()
     plt.show() 
 
-def plottimeseries(ax, times, xs, colors = None, labels = None):
+def _plottimeseries(ax, times, xs, colors = None, labels = None):
     ax.set_ylim(0,1)
     ax.plot(times, xs, c= 'black')
     if labels and colors:
@@ -81,7 +85,7 @@ def plottimeseries(ax, times, xs, colors = None, labels = None):
                         verticalalignment = 'center')
 
 
-def plotxy(ax, xs, ys, colors = None, labels = None, rotate=True):    
+def _plotxy(ax, xs, ys, colors = None, labels = None, rotate=True):    
     ax.set_xlim(-0.05,1.05)
     ax.set_ylim(-0.05,1.05)
     img = plt.imread(config.soccerfield)
@@ -109,7 +113,10 @@ def console(dbfile):
     parser.add_argument('-endmin',nargs="?",type=float)
     parser.add_argument('-relevant', action = 'store_const', const=True,
                         default= False)
-    
+    parser.add_argument('-print', action = 'store_const', const=True,
+                        default= False)
+    parser.add_argument('-plot', action = 'store_const', const=True,
+                        default= False)
     args = parser.parse_args()
     if not args.period:
         args.period = 1 if args.startmin < 45 else 2
@@ -119,7 +126,13 @@ def console(dbfile):
     with Connection(dbfile) as c:
         qry = "select id from match"
         (matchid,) = c.execute(qry).fetchall()[args.matchnb]
-        window(c,matchid,args.period,args.startmin,args.endmin,relevant=args.relevant)
+        events = getevents(c,matchid, args.period, args.startmin,
+                           args.endmin, relevant=args.relevant)
+        home,away = getteams(c, matchid)
+        if args.plot:
+            plotevents(events, home, away)
+        else:
+            printevents(events, home, away)
         
 if __name__ == '__main__':
     console(config.db_small)
