@@ -14,3 +14,14 @@ def getmatchids(c):
 def getteams(c,matchid):
     qry = "select hometeamid,awayteamid from match where id = ?"
     return c.execute(qry,(matchid,)).fetchone()
+
+def storeeventratings(c, eventratings, table):
+    qry = "insert into %s values (?,?)" % table
+    c.executemany(qry, eventratings)
+    
+def createeventratingstable(c,table):
+    qry = "drop table if exists %s" % table
+    c.execute(qry)
+    
+    qry = "create table %s (eventrowid int primary key, rating float)" % table
+    c.execute(qry)

@@ -3,7 +3,7 @@ Created on Sep 21, 2016
 
 @author: tomd
 '''
-from tools.connection import Connection
+from tools.dbhelper import Connection
 import config
 from pprint import pprint
 from tools.functional import fst,snd

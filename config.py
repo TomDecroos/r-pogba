@@ -5,11 +5,12 @@ Created on Sep 19, 2016
 '''
 
 ''' Opta dataset '''
-opta = '/cw/dtaijupiter/NoCsBack/dtai/sportsanalytics/datasets/soccer/opta'
+opta = '/cw/dtaijupiter/NoCsBack/dtai/sportsanalytics/datasets/soccer/opta/'
 
-optaf24 = opta + "/f24/mls/"
-optaf9 = opta + "/f9"
-optaf21 = opta + "/f21/mixed/"
+# optaf24mls = opta + "/f24/mls/"
+optaf9mixed = opta + "/f9/mixed/"
+optaf21mixed = opta + "/f21/mixed/"
+
 epl_matches = "data/epl-matches"
 epl_id = 8
 

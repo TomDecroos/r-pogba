@@ -8,9 +8,9 @@ import scipy.ndimage
 
 import config
 import matplotlib.pyplot as plt
-from tools.connection import Connection
+from tools.dbhelper import Connection
 from tools.time import mintosec
-from tools.sql import getfields
+from tools.dbhelper import getfields
 from db.qry import getteams
 
 

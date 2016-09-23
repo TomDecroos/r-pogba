@@ -3,25 +3,24 @@ Created on Sep 22, 2016
 
 @author: tomd
 '''
-from tools.time import mintosec, eventsec
+from tools.time import eventsec
 
-def split(events, disttofirst = 20, disttolast = 10):
+def split(events, maxdistfirst = 20, maxdistlast = 10, minnbevents = 3):
     phases = []
     phase = []
     for event in events:
-        if samephase(phase,event,disttofirst,disttolast):
+        if samephase(phase,event,maxdistfirst,maxdistlast):
             phase.append(event)
         else:
-            if validphase(phase):
+            if len(phase) >= minnbevents:
                 phases.append(phase)
-            elif (#specialevent(phase[-1]) and 
-                  phases and phases[0] and 
-            eventsec(phase[-1]) - eventsec(phases[-1][-1]) < disttolast):
+            elif (phases and phases[0] and 
+            eventsec(phase[-1]) - eventsec(phases[-1][-1]) < maxdistlast):
                 phases[-1] += phase
             phase = [event]
     return phases
     
-def samephase(phase, event, disttofirst=20,disttolast=10):
+def samephase(phase, event, maxdistfirst=20, maxdistlast=10):
     if not phase:
         return True
     
@@ -36,10 +35,7 @@ def samephase(phase, event, disttofirst=20,disttolast=10):
     time1 = eventsec(first)
     time2 = eventsec(event)
     time3 = eventsec(last)
-    return time2 - time1 < disttofirst and time2 - time3 < disttolast
-
-def validphase(phase):
-    return len(phase) >= 4
+    return time2 - time1 <= maxdistfirst and time2 - time3 <= maxdistlast
 
 def specialevent(event):
     return event['name'] in ['goal', 'corner awarded']

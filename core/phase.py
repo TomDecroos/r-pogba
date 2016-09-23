@@ -24,22 +24,30 @@ class Phase:
         timel = mintosec(l['minute'], l['second'])
         return timel - timef
     
+    def hasevent(self,name):
+        return name in map(lambda x: x['name'], self.events)
+    
     def __str__(self):
         return "\n".join(map(str,map(tuple,self.events)))
         
 
-def getallphases():
-    pass
+def getallphases(c, matchids, maxdistfirst = 20,
+                 maxdistlast = 10, minnbevents = 3):
+    phases = []
+    for mid in matchids:
+        phases += getmatchphases(c, mid, maxdistfirst, maxdistlast, minnbevents)
+    return phases
 
-def getmatchphases(c,matchid):
+def getmatchphases(c, matchid, maxdistfirst = 20,
+                   maxdistlast = 10, minnbevents = 3):
     qry = """
-        select *
+        select event.rowid as rowid, *
         from event natural join eventtype
         where matchid = ?
         order by period, minute, second
         """
     events = c.execute(qry,(matchid,)).fetchall()
-    eventss = split(events)
+    eventss = split(events, maxdistfirst, maxdistlast, minnbevents)
     home,away = getteams(c,matchid)
     return map(lambda x: Phase(x,home,away), eventss)
 
