@@ -32,20 +32,22 @@ class Phase:
         
 
 def getallphases(c, matchids, maxdistfirst = 20,
-                 maxdistlast = 10, minnbevents = 3):
+                 maxdistlast = 10, minnbevents = 3, relevant = False):
     phases = []
     for mid in matchids:
-        phases += getmatchphases(c, mid, maxdistfirst, maxdistlast, minnbevents)
+        phases += getmatchphases(c, mid, maxdistfirst,
+                                 maxdistlast, minnbevents, relevant)
     return phases
 
 def getmatchphases(c, matchid, maxdistfirst = 20,
-                   maxdistlast = 10, minnbevents = 3):
+                   maxdistlast = 10, minnbevents = 3, relevant = False):
     qry = """
         select event.rowid as rowid, *
         from event natural join eventtype
-        where matchid = ?
-        order by period, minute, second
-        """
+        where matchid = ? """
+    if relevant:
+        qry += " and relevant = %d " % relevant
+    qry += " order by period, minute, second"
     events = c.execute(qry,(matchid,)).fetchall()
     eventss = split(events, maxdistfirst, maxdistlast, minnbevents)
     home,away = getteams(c,matchid)

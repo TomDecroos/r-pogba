@@ -1,4 +1,4 @@
-select team.name, player.first, player.last, sum(rating) as score
+select team.name, player.first, player.last, count(rating) as score
 from event
 join team on (event.teamid = team.id)
 join player on (event.playerid = player.id)

@@ -16,11 +16,12 @@ epl_id = 8
 
 
 ''' Opta Database '''
-db = 'data/opta.db'
-#db = "localdata/opta.db"
-db_small = 'data/opta-small.db'
+epldb = 'data/epl.db'
+epl2012db = 'data/epl2012.db'
 eventtype_table = 'info/eventtype.sql'
 
+''' xG model'''
+xgmodel = 'data/xgmodel.pkl'
 
 ''' Images '''
 soccerfield = 'img/soccerfield.png'

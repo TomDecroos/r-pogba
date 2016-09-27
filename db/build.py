@@ -22,6 +22,7 @@ matchmappings = [
     Mapping('game_date', 'GameData', 'text'),
     Mapping('away_team_id', 'AwayTeamID', 'int'),
     Mapping('home_team_id', 'HomeTeamID', 'int'),
+    Mapping('matchday', 'Matchday', 'int')
 ]
 matchextra = [("ID", "int primary key")]
 
@@ -116,9 +117,25 @@ def smalldb(dbfile,nb):
         create_tables(c)
         epl = pickle.load(open(config.epl_matches, 'rb'))
         fill_db(c,epl[0:nb])
-        
+
+def fulldb(dbfile,matchids):
+    try:
+        os.remove(dbfile)
+    except OSError:
+        pass
+    with Connection(dbfile) as c:
+        create_tables(c)
+        fill_db(c,matchids)
+
+def getmatchidsfromseason(c,seasonid):
+    qry = "select ID from match where SeasonID = ?"
+    rows = c.execute(qry,(seasonid,))
+    return map(lambda x: x[0], rows)
+
 if __name__ == '__main__':
-    smalldb(config.db_small,100)
-       
-        
-    
+    #smalldb(config.db_small,100)
+    #epl = pickle.load(open(config.epl_matches, 'rb'))
+    #fulldb(config.epldb, epl)
+    with Connection(config.epldb) as c: 
+        matchids2012 = getmatchidsfromseason(c, 2012)
+    fulldb(config.epl2012db, matchids2012)

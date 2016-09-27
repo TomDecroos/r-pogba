@@ -6,28 +6,63 @@ Created on Sep 23, 2016
 from tools.dbhelper import Connection
 from core.phase import getmatchphases
 from db.qry import getmatchids, storeeventratings, createeventratingstable
-from core.rating import isgoal, geteventratings
+from core.rating import isgoal, expgoal
 from tools.functional import logmap
 import config
+import pickle
+from core.distributerating import simpleeventratings, xgweightedeventratings
 
 
-def ratematch(c,matchid,ratefn,table):
+def ratematch(c,matchid,ratefn,distributefn,table):
     phases = getmatchphases(c, matchid)
     ratings = []
     for phase in phases:
         rating = ratefn(phase)
-        eventratings = geteventratings(phase, rating)
+        eventratings = distributefn(phase, rating)
         ratings += eventratings
     storeeventratings(c, ratings, table)
 
-def rateevents(dbfile, ratefn, table):
-    with Connection(dbfile) as c:
+def rateevents(c, ratefn, distributefn, table):
         createeventratingstable(c,table)
         
         matchids = getmatchids(c)
         def rate(x):
-            ratematch(c, x, ratefn, table)
+            ratematch(c, x, ratefn, distributefn, table)
         logmap(rate, matchids)
+        
+def console(c):
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-isgoal', action = 'store_const', const=True,
+                        default= False)
+    parser.add_argument('-expgoal', action = 'store_const', const=True,
+                        default= False)
+    parser.add_argument('-pogba', action = 'store_const', const=True,
+                        default= False)
+    parser.add_argument('-xgweighted', action = 'store_const', const=True,
+                        default= False)
+    
+    args = parser.parse_args()
+    if args.xgweighted:
+        with open(config.xgmodel,'rb') as fh:
+            xgmodel = pickle.load(fh)
+        def distributefn(phase,rating):
+            return xgweightedeventratings(phase, rating, xgmodel)
+    else:
+        distributefn = simpleeventratings
+        
+    if args.isgoal:
+        print "building table isgoalrating..."
+        rateevents(c, isgoal, distributefn, 'isgoalrating')
+        
+    if args.expgoal:
+        print "building table expgoalrating..."
+        with open(config.xgmodel, 'rb') as fh:
+            xgmodel = pickle.load(fh)
+        rateevents(c, lambda x: expgoal(x, xgmodel),
+                   distributefn, 'expgoalrating')
 
 if __name__ == '__main__':
-    rateevents(config.db_small, isgoal, 'isgoalrating')
+    with Connection(config.epl2012db) as c:
+        console(c)
+        

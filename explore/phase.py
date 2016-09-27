@@ -46,7 +46,7 @@ def plotphasesconsecutive(phases):
         events += phase.events
     plotevents(events, phases[0].hometeamid, phases[0].awayteamid)
 
-def console():
+def console(c):
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("-matchnb", nargs="?", type=int, default=0)
@@ -62,29 +62,32 @@ def console():
     parser.add_argument('-all', action = 'store_const', const=True,
                         default= False)
     parser.add_argument('-event', nargs ="?")
+    parser.add_argument('-relevant', action = 'store_const', const=True,
+                        default= False)
     args = parser.parse_args()
     
-    with Connection(config.db_small) as c:
-        ids = getmatchids(c)
-        if args.all:
-            phases = getallphases(c,ids, args.maxdistfirst,
-                                  args.maxdistlast, args.minnbevents)
-        else:
-            phases = getmatchphases(c,ids[args.matchnb], args.maxdistfirst,
-                                args.maxdistlast, args.minnbevents)
-        if args.event:
-            phases = filter(lambda x: x.hasevent(args.event), phases)
-            
-        if args.stats:
-            stats(phases)
-        if args.hist:
-            nbhist(phases)
-            durhist(phases)
-        if args.plot:
-            plotphases(phases)
+    ids = getmatchids(c)
+    if args.all:
+        phases = getallphases(c,ids, args.maxdistfirst, args.maxdistlast,
+                              args.minnbevents, args.relevant)
+    else:
+        phases = getmatchphases(c,ids[args.matchnb], args.maxdistfirst,
+                            args.maxdistlast, args.minnbevents,
+                            args.relevant)
+    if args.event:
+        phases = filter(lambda x: x.hasevent(args.event), phases)
+        
+    if args.stats:
+        stats(phases)
+    if args.hist:
+        nbhist(phases)
+        durhist(phases)
+    if args.plot:
+        plotphases(phases)
 
 if __name__ == '__main__':
-    console()
+    with Connection(config.epl2012db) as c:
+        console(c)
 #     with Connection(config.db_small) as c:
 #         ids = getmatchids(c)
 #         phases = getmatchphases(c,ids[0])
