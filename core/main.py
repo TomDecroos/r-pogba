@@ -3,17 +3,20 @@ Created on Sep 23, 2016
 
 @author: tomd
 '''
-from tools.dbhelper import Connection
-from core.phase import getmatchphases
-from db.qry import getmatchids, storeeventratings, createeventratingstable
-from core.rating import isgoal, expgoal
-from tools.functional import logmap
-import config
+
 import pickle
+import config
+
 from core.distributerating import simpleeventratings, xgweightedeventratings
+from core.phase import getmatchphases
+from core.rating import isgoal, expgoal
+from db.qry import getmatchids, storeeventratings, createeventratingstable
+from tools.dbhelper import Connection
+from tools.functional import logmap
 
 
 def ratematch(c,matchid,ratefn,distributefn,table):
+    print matchid
     phases = getmatchphases(c, matchid)
     ratings = []
     for phase in phases:

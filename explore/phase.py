@@ -5,13 +5,12 @@ Created on Sep 22, 2016
 '''
 import matplotlib.pyplot as plt
 import config
-from tools.dbhelper import Connection
+from tools.dbhelper import Connection, getfields
 from db.qry import getmatchids
 from core.phase import getmatchphases, getallphases
 from numpy import mean, std
-from pprint import pprint
-from explore.event import plotevents
-from tools.time import sectomin
+from explore.event import plotevents, plotxy
+from tools.timefn import sectomin
 
 def nbhist(phases):
     x = map(lambda x: x.nbevents(), phases)
@@ -40,6 +39,47 @@ def plotphases(phases):
     for phase in phases:
         plotevents(phase.events,phase.hometeamid,phase.awayteamid)
 
+def plotphase(ax, phase):
+    fieldnames = "x,y,name,teamid,outcome"
+    x,y,name,teamid,outcome = getfields(phase.events,fieldnames)
+    
+    rating=None
+    if 'rating' in phase.events[0].keys():
+        rating, = getfields(phase.events,'rating')
+    
+    def correction(x,teamid):
+        return x if teamid == phase.hometeamid else 1-x
+    x = map(lambda x: correction(*x), zip(x, teamid))
+    y = map(lambda x: correction(*x), zip(y, teamid))
+    
+    teamcolours = {phase.hometeamid : 'lightblue',
+                   phase.awayteamid : 'yellow'}
+    
+    def choosecolors(teamid,outcome,name):
+        box = teamcolours.get(teamid, 'white')
+        edge = 'black' if (outcome==1 and name != 'turnover') else 'red'
+        return box,edge
+    
+    colors = map(lambda x: choosecolors(*x), zip(teamid,outcome,name))
+   
+    if 'last' in phase.events[0].keys():
+        last, = getfields(phase.events, 'last')
+        labels = map(lambda a,b: a + " | " + b, last, name)
+    else:
+        labels = name
+        
+    plotxy(ax, x, y, colors, labels, rating)
+    
+def comparephases(phase1,phase2):
+    fig = plt.figure()
+    size = 11
+    fig.set_size_inches(1.61*size,size, forward=True)
+    ax1 = plt.subplot2grid((1,2), (0,0))
+    plotphase(ax1, phase1)
+    ax2 = plt.subplot2grid((1,2), (0,1))
+    plotphase(ax2, phase2)
+    plt.show()
+
 def plotphasesconsecutive(phases):
     events = []
     for phase in phases:
@@ -64,16 +104,21 @@ def console(c):
     parser.add_argument('-event', nargs ="?")
     parser.add_argument('-relevant', action = 'store_const', const=True,
                         default= False)
+    parser.add_argument('-ratingtable', nargs ="?", type = str, default= None)
+    parser.add_argument('-players', action = 'store_const', const=True,
+                        default= False)
     args = parser.parse_args()
     
     ids = getmatchids(c)
     if args.all:
         phases = getallphases(c,ids, args.maxdistfirst, args.maxdistlast,
-                              args.minnbevents, args.relevant)
+                              args.minnbevents, args.relevant, args.ratingtable,
+                              args.players)
     else:
         phases = getmatchphases(c,ids[args.matchnb], args.maxdistfirst,
                             args.maxdistlast, args.minnbevents,
-                            args.relevant)
+                            args.relevant, args.ratingtable,
+                            args.players)
     if args.event:
         phases = filter(lambda x: x.hasevent(args.event), phases)
         

@@ -3,7 +3,7 @@ Created on Sep 22, 2016
 
 @author: tomd
 '''
-from tools.time import eventsec
+from tools.timefn import eventsec
 
 def split(events, maxdistfirst = 20, maxdistlast = 10, minnbevents = 3):
     phases = []
@@ -14,8 +14,8 @@ def split(events, maxdistfirst = 20, maxdistlast = 10, minnbevents = 3):
         else:
             if len(phase) >= minnbevents:
                 phases.append(phase)
-            elif (phases and phases[0] and 
-            eventsec(phase[-1]) - eventsec(phases[-1][-1]) < maxdistlast):
+            elif (phases and phases[0] and not specialevent(phases[-1][-1])
+            and eventsec(phase[-1]) - eventsec(phases[-1][-1]) < maxdistlast):
                 phases[-1] += phase
             phase = [event]
     return phases
@@ -25,6 +25,8 @@ def samephase(phase, event, maxdistfirst=20, maxdistlast=10):
         return True
     
     first = phase[0]
+    if first['matchid'] != event['matchid']:
+        return False
     if first['period'] != event['period']:
         return False
     
@@ -35,7 +37,7 @@ def samephase(phase, event, maxdistfirst=20, maxdistlast=10):
     time1 = eventsec(first)
     time2 = eventsec(event)
     time3 = eventsec(last)
-    return time2 - time1 <= maxdistfirst and time2 - time3 <= maxdistlast
+    return abs(time2 - time1) <= maxdistfirst and abs(time2 - time3) <= maxdistlast
 
 def specialevent(event):
     return event['name'] in ['goal', 'corner awarded']

@@ -22,5 +22,5 @@ def eventtype_freq(dbfile,matchid=None):
         pprint(eventtypes)
     
 if __name__ == '__main__':
-    eventtype_freq(config.db_small)
+    eventtype_freq(config.epl2012db)
     

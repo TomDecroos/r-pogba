@@ -19,9 +19,9 @@ def simpleeventratings(phase, phaserating):
 
 def xgweightedeventratings(phase, phaserating, xgmodel):
     X = map(getfeatures, phase.events)
-    eventweights = xgmodel.predict_proba(X)[:,1]
-    eventweights = map(lambda x: x/sum(eventweights), eventweights)
+    eventweights = list(xgmodel.predict_proba(X)[:,1])
     eventweights = eventweights[1:] + [eventweights[-1]]
+    eventweights = map(lambda x: x/sum(eventweights), eventweights)
     
     def rate(event,weight):
         if event['teamid'] == phase.hometeamid:

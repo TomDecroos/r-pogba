@@ -27,6 +27,16 @@ def executefile(c,sqlfile):
         for cmd in cmds:
             c.execute(cmd)
 
+def latexify(c, qry):
+    rows = c.execute(qry).fetchall()
+    print "\\toprule"
+    keys = rows[0].keys()
+    print "&".join(["\\textbf{%s}" % key for key in keys]) + "\\\\"
+    print "\\midrule"
+    for row in rows:
+        print "&".join([str(row[key]) for key in keys]) + "\\\\"
+    print "\\bottomrule"
+
 # easy field retrieval
 
 def getfields(rows,fieldnames):

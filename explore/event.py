@@ -9,9 +9,10 @@ import scipy.ndimage
 import config
 import matplotlib.pyplot as plt
 from tools.dbhelper import Connection
-from tools.time import mintosec
+from tools.timefn import mintosec
 from tools.dbhelper import getfields
 from db.qry import getteams
+import pprint
 
 
 def getevents(c,matchid,period=1,startmin=0,endmin=1,relevant=True):
@@ -39,6 +40,11 @@ def printevents(events, hometeamid, awayteamid):
 def plotevents(events,hometeamid,awayteamid):
     fieldnames = "x,y,minute,second,name,teamid,outcome"
     x,y,minute,second,name,teamid,outcome = getfields(events,fieldnames)
+    
+    rating=None
+    if 'rating' in events[0].keys():
+        rating, = getfields(events,'rating')
+        
     time = map(lambda x:mintosec(x[0],x[1]), zip(minute,second))
     
     def correction(x,teamid):
@@ -59,15 +65,22 @@ def plotevents(events,hometeamid,awayteamid):
     fig = plt.figure()
     size = 11
     fig.set_size_inches(1.61*size,size, forward=True)
-    
+      
     axtx = plt.subplot2grid((2,2), (0,0))
     _plottimeseries(axtx, time, x, colors, name)
-    
+     
     axty = plt.subplot2grid((2,2), (1,0))
     _plottimeseries(axty, time, y, colors, name)
    
+    if 'last' in events[0].keys():
+        last, = getfields(events, 'last')
+        #last = map(lambda x: x.split(" ")[0],last)
+        labels = map(lambda a,b: a + " | " + b, last, name)
+    else:
+        labels = name
+        
     axxy = plt.subplot2grid((2,2), (0,1), rowspan = 2)
-    _plotxy(axxy, x, y, colors, name)
+    plotxy(axxy, x, y, colors, labels, rating)
     
     plt.tight_layout()
     plt.show() 
@@ -85,7 +98,7 @@ def _plottimeseries(ax, times, xs, colors = None, labels = None):
                         verticalalignment = 'center')
 
 
-def _plotxy(ax, xs, ys, colors = None, labels = None, rotate=True):    
+def plotxy(ax, xs, ys, colors = None, labels = None, ratings = None, rotate=True):    
     ax.set_xlim(-0.05,1.05)
     ax.set_ylim(-0.05,1.05)
     img = plt.imread(config.soccerfield)
@@ -103,6 +116,12 @@ def _plotxy(ax, xs, ys, colors = None, labels = None, rotate=True):
             ax.annotate(label, xy=(x, y), bbox = bbox,
                         horizontalalignment = 'center',
                         verticalalignment = 'center')
+        if ratings:
+            for x,y,rating,label in zip(xs,ys,ratings,labels):
+                ax.annotate("%.3f" % rating, xy=(x+0.007*len(label), y),
+                            color="white",
+                            weight="bold",
+                            verticalalignment = 'center')
 
 def console(dbfile):
     import argparse
@@ -135,4 +154,4 @@ def console(dbfile):
             printevents(events, home, away)
         
 if __name__ == '__main__':
-    console(config.db_small)
+    console(config.epl2012db)

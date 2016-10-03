@@ -22,7 +22,15 @@ def dtw(x, y, dist):
     for i in range(r):
         for j in range(c):
             D1[i, j] += min(D0[i, j], D0[i, j+1], D0[i+1, j])
-    return D1[-1, -1]
+    return float(D1[-1, -1])/ (r*c)
 
-def dtw_euclid(x,y):
+def dtweuclid(x,y):
+    return dtw(x,y,lambda x,y:(x-y)*(x-y))
+def dtwmanhattan(x,y):
     return dtw(x,y,lambda x,y:abs(x-y))
+
+def dtwphase(phase1,phase2,dtwfn=dtweuclid):
+    x1,y1 = phase1.correctedcoords()
+    x2,y2 = phase2.correctedcoords()
+    result = dtwfn(x1,x2) + dtwfn(y1,y2)
+    return result

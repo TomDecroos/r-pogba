@@ -24,7 +24,7 @@ INSERT INTO EventType VALUES
 (45, 'challenge', 0),
 (47, 'rescinded card', 0),
 (49, 'ball recovery', 0),
-(51, 'error', 1),
+(51, 'error', 0),
 (52, 'keeper pick-up', 1),
 (53, 'cross not claimed', 0),
 (55, 'offside provoked', 0),
