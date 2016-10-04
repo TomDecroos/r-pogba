@@ -22,7 +22,7 @@ def dtw(x, y, dist):
     for i in range(r):
         for j in range(c):
             D1[i, j] += min(D0[i, j], D0[i, j+1], D0[i+1, j])
-    return float(D1[-1, -1])/ (r*c)
+    return float(D1[-1, -1]) #/ (r*c)
 
 def dtweuclid(x,y):
     return dtw(x,y,lambda x,y:(x-y)*(x-y))

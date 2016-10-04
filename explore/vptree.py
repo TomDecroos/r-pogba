@@ -20,7 +20,7 @@ if __name__ == '__main__':
     with Connection(config.epl2012db) as c:
         ids = getmatchids(c)
         with Timer("getting phases"):
-            phases = getallphases(c, ids[0:50])
+            phases = getallphases(c, ids[0:100])
     print "n: %d" % len(phases)
     with Timer("building tree"):
         tree = VPTree(phases, dtwphase)
