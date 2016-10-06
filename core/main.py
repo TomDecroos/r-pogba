@@ -14,6 +14,7 @@ from db.qry import getmatchids, storeeventratings, createeventratingstable
 from tools.dbhelper import Connection
 from tools.functional import logmap
 from tools.timefn import Timer
+from pogba.vptree import VPTree
 
 
 def ratematch(c,matchid,ratefn,distributefn,table):
@@ -38,8 +39,10 @@ def gettable(args):
     if args.pogba:
         if args.expgoal:
             table = "pogbaexppgoalrating"
-        else:
+        elif args.isgoal:
             table = "pogbaisgoalrating"
+        else:
+            raise Exception("No valid rating function given")
     elif args.isgoal:
         table = "isgoal"
     elif args.expgoal:
@@ -73,7 +76,7 @@ def getratefn(args):
                 return pogba(x,phasetree,args.k,lambda x: expgoal(x,xgmodel))
         else:
             def ratefn(x):
-                pogba(x,phasetree,args.k,isgoal)
+                return pogba(x,phasetree,args.k,isgoal)
     elif args.isgoal:
         ratefn = isgoal
     elif args.expgoal:
@@ -83,6 +86,7 @@ def getratefn(args):
 
 def execute(c, args):
     table = gettable(args)
+    
     if args.create:
         print "creating table %s" % table
         createeventratingstable(c, table)
