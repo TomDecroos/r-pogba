@@ -28,7 +28,7 @@ def getevents(c,matchid,period=1,startmin=0,endmin=1,relevant=True):
     return c.execute(qry, values).fetchall()
 
 def printevents(events, hometeamid, awayteamid):
-    fieldnames = "name,teamid,outcome"
+    fieldnames = "Name,Teamid,Outcome"
     name, teamid, outcome = getfields(events, fieldnames)
     
     for t, n, o in zip(teamid, name, outcome):
@@ -38,12 +38,12 @@ def printevents(events, hometeamid, awayteamid):
         print msg
     
 def plotevents(events,hometeamid,awayteamid):
-    fieldnames = "x,y,minute,second,name,teamid,outcome"
+    fieldnames = "X,Y,Minute,Second,Name,TeamID,Outcome"
     x,y,minute,second,name,teamid,outcome = getfields(events,fieldnames)
     
     rating=None
-    if 'rating' in events[0].keys():
-        rating, = getfields(events,'rating')
+    if 'Rating' in events[0].keys():
+        rating, = getfields(events,'Rating')
         
     time = map(lambda x:mintosec(x[0],x[1]), zip(minute,second))
     
@@ -56,7 +56,7 @@ def plotevents(events,hometeamid,awayteamid):
                    awayteamid : 'yellow'}
     
     def choosecolors(teamid,outcome,name):
-        box = teamcolours.get(teamid, 'white')
+        box = teamcolours.get(teamid, 'wh,ite')
         edge = 'black' if (outcome==1 and name != 'turnover') else 'red'
         return box,edge
     
@@ -72,8 +72,8 @@ def plotevents(events,hometeamid,awayteamid):
     axty = plt.subplot2grid((2,2), (1,0))
     _plottimeseries(axty, time, y, colors, name)
    
-    if 'last' in events[0].keys():
-        last, = getfields(events, 'last')
+    if 'Last' in events[0].keys():
+        last, = getfields(events, 'Last')
         #last = map(lambda x: x.split(" ")[0],last)
         labels = map(lambda a,b: a + " | " + b, last, name)
     else:

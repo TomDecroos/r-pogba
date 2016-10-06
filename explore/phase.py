@@ -40,7 +40,7 @@ def plotphases(phases):
         plotevents(phase.events,phase.hometeamid,phase.awayteamid)
 
 def plotphase(ax, phase):
-    fieldnames = "x,y,name,teamid,outcome"
+    fieldnames = "X,Y,Name,TeamID,Outcome"
     x,y,name,teamid,outcome = getfields(phase.events,fieldnames)
     
     rating=None

@@ -10,7 +10,7 @@ from db.qry import getteams
 class Phase:
     
     def __init__(self, events, hometeamid, awayteamid):
-        self.events = events
+        self.events = map(dict,events)
         self.hometeamid = hometeamid
         self.awayteamid = awayteamid
     
@@ -20,18 +20,18 @@ class Phase:
     def duration(self):
         f = self.events[0]
         l = self.events[-1]
-        timef = mintosec(f['minute'], f['second'])
-        timel = mintosec(l['minute'], l['second'])
+        timef = mintosec(f['Minute'], f['Second'])
+        timel = mintosec(l['Minute'], l['Second'])
         return timel - timef
     
     def hasevent(self,name):
-        return name in map(lambda x: x['name'], self.events)
+        return name in map(lambda x: x['Name'], self.events)
     
     def _correctedxy(self,e):
-        if e['teamid'] == self.hometeamid:
-            return e['x'], e['y']
+        if e['TeamID'] == self.hometeamid:
+            return e['X'], e['Y']
         else:
-            return 1- e['x'], 1 - e['y']
+            return 1- e['X'], 1 - e['Y']
     
     def correctedcoords(self):
         return zip(*[self._correctedxy(e) for e in self.events])

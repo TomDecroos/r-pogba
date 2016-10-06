@@ -27,7 +27,6 @@ class TDTree(object):
         
         (inds,) = self.kimtree.radius_neighbors(q, radius=math.sqrt(maxdtw),
                                                 return_distance = False)
-        print len(inds)
         nns = [self.phases[index] for index in inds]
         nns = sorted([(dtwphase(phase, nn), nn) for nn in nns], key = fst)
         

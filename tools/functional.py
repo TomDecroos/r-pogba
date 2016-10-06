@@ -4,7 +4,8 @@ Created on Sep 19, 2016
 @author: tomd
 '''
 import sys
-
+import time
+from tools.timefn import sectomin
 
 def logmap(f, xs):
     n = len(xs)
@@ -13,6 +14,7 @@ def logmap(f, xs):
     sys.stdout.flush()
     results = list()
     err_cnt = 0
+    start = time.time()
     for i, x in enumerate(xs):
         try:
             results.append(f(x))
@@ -20,7 +22,10 @@ def logmap(f, xs):
             raise e
         except:
             err_cnt += 1
-        sys.stdout.write("\r%d/%d errors: %d" % (i + 1, n, err_cnt))
+        end = time.time()
+        minute,sec = sectomin(end-start)
+        sys.stdout.write("\r%d/%d errors: %d time: %dm%ds"
+                         % (i + 1, n, err_cnt,minute,sec))
         sys.stdout.flush()
     print ""
     return results

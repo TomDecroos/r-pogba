@@ -8,9 +8,9 @@ from xg.model import getfeatures
 def simpleeventratings(phase, phaserating):
     eventrating = float(phaserating) / len(phase.events)
     def rate(event):
-        if event['teamid'] == phase.hometeamid:
+        if event['TeamID'] == phase.hometeamid:
             return eventrating
-        elif event['teamid'] == phase.awayteamid:
+        elif event['TeamID'] == phase.awayteamid:
             return -eventrating
         else:
             return 0
@@ -24,9 +24,9 @@ def xgweightedeventratings(phase, phaserating, xgmodel):
     eventweights = map(lambda x: x/sum(eventweights), eventweights)
     
     def rate(event,weight):
-        if event['teamid'] == phase.hometeamid:
+        if event['TeamID'] == phase.hometeamid:
             t = phaserating
-        elif event['teamid'] == phase.awayteamid:
+        elif event['TeamID'] == phase.awayteamid:
             t = -phaserating
         else:
             t = 0

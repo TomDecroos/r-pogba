@@ -23,9 +23,9 @@ def tdvsvp(phases, phase, k):
     print "total td dist :", sum([dtwphase(phase, p) for d,p in tdnn])
     
     with Timer("building vp tree"):
-        vptree = VPTree(phases, dtwphase)
+        vptree = VPTree(phases)
     with Timer("finding vp nn"):
-        vpnn = get_nearest_neighbors(vptree, phase, k)
+        vpnn = vptree.getnn(phase, k)
     
     print "total vp dist :", sum([dtwphase(phase, p) for d,p in vpnn])
 
@@ -41,8 +41,7 @@ if __name__ == '__main__':
     with Connection(config.epl2012db) as c:
         ids = getmatchids(c)
         with Timer("getting phases"):
-            phases = getallphases(c, ids, relevant=True)
-            print "nb of phases: ", len(phases)
+            phases = getallphases(c, ids[0:10], relevant=True)
         #exploretd(phases, phases[50], 100)
         tdvsvp(phases, phases[50], 100)
         

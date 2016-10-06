@@ -2,6 +2,12 @@
 from collections import deque
 import random
 import numpy as np
+from pogba.dtw import dtwphase
+from core.phase import getallphases
+from db.qry import getmatchids
+from tools.dbhelper import Connection
+import config
+from tools.timefn import Timer
 #import heapq
 
 class NDPoint(object):
@@ -21,7 +27,7 @@ class VPTree(object):
     search. 
     """
 
-    def __init__(self, points, dist_fn=None):
+    def __init__(self, points, dist_fn=dtwphase):
         self.left = None
         self.right = None
         self.mu = None
@@ -54,6 +60,9 @@ class VPTree(object):
 
     def is_leaf(self):
         return (self.left is None) and (self.right is None)
+    
+    def getnn(self,phase,k=5):
+        return get_nearest_neighbors(self, phase, k)
 
 class PriorityQueue(object):
     def __init__(self, size=None):
@@ -158,12 +167,21 @@ def get_all_in_range(tree, q, tau):
     return neighbors
 
 
+def savephasetree(c, fh):
+    import pickle
+    with Timer("getting phases"):
+        ids = getmatchids(c)
+        phases = getallphases(c, ids,relevant=True)
+    with Timer("constructing phase tree"):
+        phasetree = VPTree(phases)
+    with Timer("dumping phase tree"):
+        pickle.dump(phasetree, fh)
 
-if __name__ == '__main__':
+def _test():
     X = np.random.uniform(0, 100000, size=10000)
     Y = np.random.uniform(0, 100000, size=10000)
     points = [NDPoint(x,i) for i, x in  enumerate(zip(X,Y))]
-    tree = VPTree(points)
+    tree = VPTree(points,None)
     q = NDPoint([300,300])
     neighbors = get_nearest_neighbors(tree, q, 5)
 
@@ -172,5 +190,9 @@ if __name__ == '__main__':
     print("nearest neighbors: ")
     for d, n in neighbors:
         print("\t", n)
-
+        
+if __name__ == '__main__':
+    with Connection(config.epl2012db) as c, \
+        open(config.phasetree,'wb') as fh:
+            savephasetree(c,fh)
     

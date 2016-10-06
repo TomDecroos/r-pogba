@@ -40,8 +40,10 @@ def latexify(c, qry):
 # easy field retrieval
 
 def getfields(rows,fieldnames):
-    return tuple(map(lambda f: map(lambda r: r[f], rows),
-                     fieldnames.split(',')))
+    fields = fieldnames.split(',')
+    def fieldvalues(field):
+        return [row[field] for row in rows]
+    return tuple([fieldvalues(field) for field in fields])
     
 # mapping xml to sql
 

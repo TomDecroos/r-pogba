@@ -29,7 +29,7 @@ def getshots(c):
     return rows
 
 def getfeatures(shot):
-    p = Point(shot['x'], shot['y'])
+    p = Point(shot['X'], shot['Y'])
     v1 = p.vector(goalhome)
     v2 = p.vector(goalaway)
     v = min([v1,v2],key=lambda x: x.abs())
@@ -38,7 +38,7 @@ def getfeatures(shot):
 def savexgmodel(c, fh):
     shots = getshots(c)
     X = np.array(map(getfeatures, shots))
-    y = np.array(map(lambda x: x['name']=="goal", shots))
+    y = np.array(map(lambda x: x['Name']=="goal", shots))
     model = LogisticRegression()
     model.fit(X,y)
     pickle.dump(model, fh)
@@ -46,7 +46,7 @@ def savexgmodel(c, fh):
 def testxgmodel(c, fh):
     shots = getshots(c)
     X = np.array(map(getfeatures, shots))
-    y = np.array(map(lambda x: x['name']=="goal", shots))
+    y = np.array(map(lambda x: x['Name']=="goal", shots))
     model = pickle.load(fh)
     y_pre = model.predict_proba(X)[:,1]
     print "ROC AUC: %.3f" % roc_auc_score(y,y_pre)

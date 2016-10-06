@@ -22,6 +22,8 @@ eventtype_table = 'info/eventtype.sql'
 
 ''' xG model'''
 xgmodel = 'data/xgmodel.pkl'
+''' Pogba'''
+phasetree = 'data/phasetree.pkl'
 
 ''' Images '''
 soccerfield = 'img/soccerfield.png'

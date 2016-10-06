@@ -7,15 +7,15 @@ from xg.model import getfeatures
 import numpy as np
 
 def isgoal(phase):
-    goals = filter(lambda x: x['name'] == 'goal', phase.events)
-    home = 1 if filter(lambda x: x['teamid'] == phase.hometeamid, goals) else 0
-    away = 1 if filter(lambda x: x['teamid'] == phase.awayteamid, goals) else 0
+    goals = filter(lambda x: x['Name'] == 'goal', phase.events)
+    home = 1 if filter(lambda x: x['TeamID'] == phase.hometeamid, goals) else 0
+    away = 1 if filter(lambda x: x['TeamID'] == phase.awayteamid, goals) else 0
     return home - away
 
 def expgoal(phase,xgmodel):
     home, away = 0,0
     def is_shot(x):
-        return x['name'] in ['goal','attempt saved','miss','post']
+        return x['Name'] in ['goal','attempt saved','miss','post']
     shots = filter(is_shot, phase.events)
     if shots:
         X = np.array(map(getfeatures,shots))
@@ -24,11 +24,14 @@ def expgoal(phase,xgmodel):
         xgs = xgmodel.predict_proba(X)[:,1]
         home, away = 0, 0
         for xg, shot in zip(xgs,shots):
-            if shot['teamid'] == phase.hometeamid:
+            if shot['TeamID'] == phase.hometeamid:
                 home += xg
-            if shot['teamid'] == phase.awayteamid:
+            if shot['TeamID'] == phase.awayteamid:
                 away += xg
     return home - away
 
-def pogba(phase):
-    return 0
+def pogba(phase,phasetree,k=100,ratefn=isgoal):
+    dists,nns = zip(*phasetree.getnn(phase,k))
+    return float(sum([ratefn(nn) for nn in nns])) / k
+    
+    
