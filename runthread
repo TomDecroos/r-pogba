@@ -1,0 +1,5 @@
+function pythonp {
+export PYTHONPATH=$(pwd) && python "$@"
+}
+
+pythonp core/main.py $3 $4 -i $1 -n $2 2>&1 | tee tmp/logs/runthread$1.log

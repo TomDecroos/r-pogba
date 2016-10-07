@@ -15,6 +15,8 @@ from tools.dbhelper import Connection
 from tools.functional import logmap
 from tools.timefn import Timer
 from pogba.vptree import VPTree
+import os
+import time
 
 
 def ratematch(c,matchid,ratefn,distributefn,table):
@@ -48,6 +50,7 @@ def gettable(args):
     elif args.expgoal:
         table = "expgoal"
     else:
+        print "Exception: No valid rating function given"
         raise Exception("No valid rating function given")
     return table
 
@@ -84,13 +87,7 @@ def getratefn(args):
             return expgoal(x,xgmodel)
     return ratefn
 
-def execute(c, args):
-    table = gettable(args)
-    
-    if args.create:
-        print "creating table %s" % table
-        createeventratingstable(c, table)
-    else:
+def execute(c, args, table, folder):
         matchids = getmatchids(c)
         nb = len(matchids)
         step = float(nb)/args.n
@@ -107,8 +104,27 @@ def execute(c, args):
         
         ratingss = logmap(getactionratings, phases)
         ratings = [r for ratings in ratingss for r in ratings]
-        with Timer("storing action ratings"):
-            storeeventratings(c, ratings, table)
+        with Timer("Dumping action ratings"):
+            fh = open("%s%s-%d.pkl" % (folder,table, args.i),'wb')
+            pickle.dump(ratings,fh)
+
+def storeindatabase(c, args, folder):
+    cnt = 0
+    while True:
+        dumps = filter(lambda x: ".pkl" in x, os.listdir(folder))
+        if dumps:
+            for dump in dumps:
+                table = dump.split("-")[0]
+                with Timer("storing %s in database" % dump):
+                    ratings = pickle.load(open(folder + dump,'rb'))
+                    storeeventratings(c, ratings, table)
+                    os.remove(folder + dump)
+                cnt+=1
+            if cnt >= args.n - 1:
+                print "%d dumps stored, shutting down." % args.n
+                break
+        else:
+            time.sleep(2)
     
 def console():
     import argparse
@@ -126,14 +142,22 @@ def console():
     parser.add_argument("-i", nargs="?", type=int, default=0)
     parser.add_argument('-create', action = 'store_const', const=True,
                         default= False)
+    parser.add_argument('-store', action = 'store_const', const=True,
+                        default= False)
     
     return parser.parse_args()
-        
-        
 
 if __name__ == '__main__':
     args = console()
     with Connection(config.epl2012db) as c:
-        execute(c,args)
+        if args.store:
+            storeindatabase(c, args, config.tmpratingsfolder)
+        else:
+            table = gettable(args)
+            if args.create:
+                print "creating table %s" % table
+                createeventratingstable(c, table)
+            else:
+                execute(c, args, table, config.tmpratingsfolder)
         
         

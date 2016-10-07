@@ -1,0 +1,17 @@
+#1=nb of threads
+#2= -pogba
+#3= -expgoal
+
+function pythonp {
+export PYTHONPATH=$(pwd) && python "$@"
+}
+
+rm tmp/logs/*
+pythonp core/main.py $2 $3 -create
+for((i=0;i<$1;i++)); do
+    echo "starting thread $i"
+    screen -dm \
+    bash runthread $i $1 $2 $3
+done
+echo "starting store thread"
+screen -dm bash storethread $1

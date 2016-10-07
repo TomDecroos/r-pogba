@@ -1,0 +1,5 @@
+function pythonp {
+export PYTHONPATH=$(pwd) && python "$@"
+}
+
+pythonp core/main.py -store -n $1 2>&1 | tee tmp/logs/storethread.log

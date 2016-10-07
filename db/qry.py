@@ -6,6 +6,8 @@ Functions for frequent queries
 @author: tomd
 '''
 from tools.functional import fst
+import sqlite3
+from time import sleep
 
 def getmatchids(c):
     qry = "select id from match"

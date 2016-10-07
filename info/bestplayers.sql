@@ -1,7 +1,8 @@
-select team.name, player.first, player.last, count(rating) as score
+select team.name, player.first, player.last, sum(isgoal.rating) as score
 from event
 join team on (event.teamid = team.id)
 join player on (event.playerid = player.id)
-join isgoalrating on (event.rowid = isgoalrating.eventrowid)
+join expgoal on (event.rowid = expgoal.eventrowid)
 group by team.name, player.id
-order by score;
+order by score desc
+limit 15;

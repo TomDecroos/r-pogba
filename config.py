@@ -27,3 +27,6 @@ phasetree = 'data/phasetree.pkl'
 
 ''' Images '''
 soccerfield = 'img/soccerfield.png'
+
+''' Temp data'''
+tmpratingsfolder = "tmp/ratings/"
